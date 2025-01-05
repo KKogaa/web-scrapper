@@ -12,7 +12,6 @@ export class ScrapperController {
 
   @Get()
   public async search(@Query() query: SearchQueryDto): Promise<Product[]> {
-    //TODO: map this to a dto
     return this.scrapperService.scrap(query.searchTerm);
   }
 }

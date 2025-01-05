@@ -43,6 +43,7 @@ export class ScrapperClientPuppeteer implements ScrapperClient {
       const gridContainer = document.querySelector(
         '#testId-searchResults-products',
       );
+
       if (!gridContainer) {
         return [];
       }
@@ -88,18 +89,15 @@ export class ScrapperClientPuppeteer implements ScrapperClient {
     }
 
     const price = this.parsePriceString(rawProduct.price);
-    let originalPrice = this.parsePriceString(rawProduct.originalPrice);
-    if (!originalPrice.price) {
-      originalPrice = price;
-    }
+    const originalPrice = this.parsePriceString(rawProduct.originalPrice);
 
     return new Product(
       rawProduct.subTitle,
       price.price,
       price.currency,
       this.extractPercentage(rawProduct.discount),
-      originalPrice.price,
-      originalPrice.currency,
+      !originalPrice.price ? originalPrice.price : price.price,
+      !originalPrice.currency ? originalPrice.currency : price.currency,
     );
   }
 
@@ -119,15 +117,16 @@ export class ScrapperClientPuppeteer implements ScrapperClient {
         .filter((product: Product) => product !== null);
     } catch (error) {
       console.error('Error scraping with Puppeteer', error);
+      throw new Error('Error scraping with Puppeteer');
     }
   }
 
-  private extractPercentage(text: string): number {
-    if (!text) {
-      return 0;
-    }
+  public async specificScrap(): Promise<void> {
+    return null;
+  }
 
-    return parseInt(text.match(/-?\d+/)[0]);
+  private extractPercentage(text: string): number {
+    return !text ? 0 : parseInt(text.match(/-?\d+/)[0]);
   }
 
   private parsePriceString(priceText: string): {
@@ -149,9 +148,5 @@ export class ScrapperClientPuppeteer implements ScrapperClient {
       currency: currency,
       price: price,
     };
-  }
-
-  public async specificScrap(): Promise<void> {
-    return null;
   }
 }
